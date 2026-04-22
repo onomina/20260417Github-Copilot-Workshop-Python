@@ -155,7 +155,7 @@ def build_html() -> str:
     }
 
     function applyTheme() {
-      const theme = themes[el.theme.value] || themes.light;
+      const theme = themes[el.theme.value] || themes['light'];
       document.documentElement.style.setProperty('--bg', theme.bg);
       document.documentElement.style.setProperty('--card', theme.card);
       document.documentElement.style.setProperty('--text', theme.text);

@@ -3,7 +3,7 @@ import pathlib
 import unittest
 
 
-APP_PATH = pathlib.Path(__file__).resolve().parents[1] / "app.py"
+APP_PATH = pathlib.Path(__file__).resolve().parent.parent / "app.py"
 
 
 spec = importlib.util.spec_from_file_location("pomodoro_app", APP_PATH)

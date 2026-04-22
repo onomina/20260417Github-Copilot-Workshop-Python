@@ -74,6 +74,10 @@ class PomodoroApp:
         self.ripples: list[dict[str, float]] = []
         self.particles: list[dict[str, float]] = []
         self.last_ripple_at = 0.0
+        self.center_x = 170
+        self.center_y = 170
+        self.ring_radius = 96
+        self.ring_width = 20
 
         self.status_label = tk.Label(
             self.root,
@@ -87,6 +91,33 @@ class PomodoroApp:
         self.canvas = tk.Canvas(self.root, width=340, height=340, bg="#f4f4fb", highlightthickness=0)
         self.canvas.pack()
 
+        self.background_oval = self.canvas.create_oval(
+            self.center_x - self.ring_radius - 10,
+            self.center_y - self.ring_radius - 10,
+            self.center_x + self.ring_radius + 10,
+            self.center_y + self.ring_radius + 10,
+            fill="#eef0fb",
+            outline="",
+        )
+        self.base_ring = self.canvas.create_oval(
+            self.center_x - self.ring_radius,
+            self.center_y - self.ring_radius,
+            self.center_x + self.ring_radius,
+            self.center_y + self.ring_radius,
+            outline="#dcdfea",
+            width=self.ring_width,
+        )
+        self.progress_ring = self.canvas.create_arc(
+            self.center_x - self.ring_radius,
+            self.center_y - self.ring_radius,
+            self.center_x + self.ring_radius,
+            self.center_y + self.ring_radius,
+            start=90,
+            extent=-360,
+            style=tk.ARC,
+            outline=progress_to_color(0.0),
+            width=self.ring_width,
+        )
         self.time_text = self.canvas.create_text(
             170, 170, text="25:00", fill="#2f2f38", font=("Yu Gothic UI", 36, "bold")
         )
@@ -182,25 +213,12 @@ class PomodoroApp:
             self.root.after(UPDATE_INTERVAL_MS, self.tick)
 
     def draw(self) -> None:
-        self.canvas.delete("ring")
-        self.canvas.delete("effect")
+        self.canvas.delete("effect_dynamic")
 
-        center_x, center_y = 170, 170
-        ring_radius = 96
-        ring_width = 20
+        center_x, center_y = self.center_x, self.center_y
         total_seconds = max(1.0, float(self.total_seconds))
         elapsed_ratio = 1 - (self.remaining_seconds / total_seconds)
         progress_extent = 360 * (self.remaining_seconds / total_seconds)
-
-        self.canvas.create_oval(
-            center_x - ring_radius - 10,
-            center_y - ring_radius - 10,
-            center_x + ring_radius + 10,
-            center_y + ring_radius + 10,
-            fill="#eef0fb",
-            outline="",
-            tags="effect",
-        )
 
         if self.running:
             for ripple in self.ripples:
@@ -222,7 +240,7 @@ class PomodoroApp:
                         center_y + r,
                         outline=ripple_color,
                         width=2,
-                        tags="effect",
+                        tags="effect_dynamic",
                     )
             self.ripples = [r for r in self.ripples if r["radius"] < r["max_radius"]]
 
@@ -239,31 +257,14 @@ class PomodoroApp:
                     py + p["size"],
                     fill=current_color,
                     outline="",
-                    tags="effect",
+                    tags="effect_dynamic",
                 )
             self.particles = [p for p in self.particles if p["radius"] < PARTICLE_MAX_RADIUS]
 
-        self.canvas.create_oval(
-            center_x - ring_radius,
-            center_y - ring_radius,
-            center_x + ring_radius,
-            center_y + ring_radius,
-            outline="#dcdfea",
-            width=ring_width,
-            tags="ring",
-        )
-
-        self.canvas.create_arc(
-            center_x - ring_radius,
-            center_y - ring_radius,
-            center_x + ring_radius,
-            center_y + ring_radius,
-            start=90,
+        self.canvas.itemconfigure(
+            self.progress_ring,
             extent=-progress_extent,
-            style=tk.ARC,
             outline=progress_to_color(elapsed_ratio),
-            width=ring_width,
-            tags="ring",
         )
 
         self.canvas.itemconfigure(self.time_text, text=self.format_time(self.remaining_seconds))

@@ -9,17 +9,23 @@ except ModuleNotFoundError:
 
 FOCUS_SECONDS = 25 * 60
 UPDATE_INTERVAL_MS = 50
+MAX_PARTICLES = 48
+PARTICLE_MAX_RADIUS = 180.0
+RIPPLE_BASE_SHADE = 180
+RIPPLE_SHADE_OFFSET = 40
+RIPPLE_MIN_SHADE = 70
 
-BLUE = (66, 135, 245)
-YELLOW = (245, 205, 66)
-RED = (245, 66, 66)
+RGBColor = tuple[int, int, int]
+BLUE: RGBColor = (66, 135, 245)
+YELLOW: RGBColor = (245, 205, 66)
+RED: RGBColor = (245, 66, 66)
 
 
 def clamp(value: float, minimum: float, maximum: float) -> float:
     return max(minimum, min(maximum, value))
 
 
-def lerp_color(start: tuple[int, int, int], end: tuple[int, int, int], t: float) -> tuple[int, int, int]:
+def lerp_color(start: RGBColor, end: RGBColor, t: float) -> RGBColor:
     ratio = clamp(t, 0.0, 1.0)
     return tuple(int(s + (e - s) * ratio) for s, e in zip(start, end))
 
@@ -144,8 +150,8 @@ class PomodoroApp:
                 "drift": random.uniform(-0.03, 0.03),
             }
         )
-        if len(self.particles) > 48:
-            self.particles = self.particles[-48:]
+        if len(self.particles) > MAX_PARTICLES:
+            self.particles = self.particles[-MAX_PARTICLES:]
 
         if self.remaining_seconds <= 0:
             self.running = False
@@ -180,7 +186,13 @@ class PomodoroApp:
                 ripple["radius"] += ripple["speed"] * 2
                 r = ripple["radius"]
                 if r < ripple["max_radius"]:
-                    shade = int(clamp(180 - (r - 40), 70, 180))
+                    shade = int(
+                        clamp(
+                            RIPPLE_BASE_SHADE - (r - RIPPLE_SHADE_OFFSET),
+                            RIPPLE_MIN_SHADE,
+                            RIPPLE_BASE_SHADE,
+                        )
+                    )
                     ripple_color = f"#{shade:02x}{shade:02x}ff"
                     self.canvas.create_oval(
                         center_x - r,
@@ -208,7 +220,7 @@ class PomodoroApp:
                     outline="",
                     tags="effect",
                 )
-            self.particles = [p for p in self.particles if p["radius"] < 180]
+            self.particles = [p for p in self.particles if p["radius"] < PARTICLE_MAX_RADIUS]
 
         self.canvas.create_oval(
             center_x - ring_radius,

@@ -27,6 +27,7 @@ PARTICLE_SIZE_MIN = 2.0
 PARTICLE_SIZE_MAX = 4.5
 PARTICLE_DRIFT_MIN = -0.03
 PARTICLE_DRIFT_MAX = 0.03
+TKINTER_UNAVAILABLE_MESSAGE = "tkinter が利用できない環境です。GUI を実行できません。"
 
 RGBColor = tuple[int, int, int]
 BLUE: RGBColor = (66, 135, 245)
@@ -55,7 +56,7 @@ def progress_to_color(elapsed_ratio: float) -> str:
 class PomodoroApp:
     def __init__(self) -> None:
         if tk is None:
-            raise RuntimeError("tkinter が利用できない環境です。GUI を実行できません。")
+            raise RuntimeError(TKINTER_UNAVAILABLE_MESSAGE)
         self.root = tk.Tk()
         self.root.title("ポモドーロタイマー")
         self.root.configure(bg="#f4f4fb")
@@ -183,8 +184,9 @@ class PomodoroApp:
         center_x, center_y = 170, 170
         ring_radius = 96
         ring_width = 20
-        elapsed_ratio = 1 - (self.remaining_seconds / self.total_seconds)
-        progress_extent = 360 * (self.remaining_seconds / self.total_seconds)
+        total_seconds = max(1.0, float(self.total_seconds))
+        elapsed_ratio = 1 - (self.remaining_seconds / total_seconds)
+        progress_extent = 360 * (self.remaining_seconds / total_seconds)
 
         self.canvas.create_oval(
             center_x - ring_radius - 10,
@@ -268,5 +270,5 @@ class PomodoroApp:
 
 if __name__ == "__main__":
     if tk is None:
-        raise SystemExit("tkinter がインストールされていないため起動できません。")
+        raise SystemExit(TKINTER_UNAVAILABLE_MESSAGE)
     PomodoroApp().run()

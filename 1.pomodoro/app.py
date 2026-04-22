@@ -1,7 +1,6 @@
 import math
 import random
 import time
-from typing import cast
 try:
     import tkinter as tk
 except ModuleNotFoundError:
@@ -42,7 +41,11 @@ def clamp(value: float, minimum: float, maximum: float) -> float:
 
 def lerp_color(start: RGBColor, end: RGBColor, t: float) -> RGBColor:
     ratio = clamp(t, 0.0, 1.0)
-    return cast(RGBColor, tuple(int(s + (e - s) * ratio) for s, e in zip(start, end)))
+    return (
+        int(start[0] + (end[0] - start[0]) * ratio),
+        int(start[1] + (end[1] - start[1]) * ratio),
+        int(start[2] + (end[2] - start[2]) * ratio),
+    )
 
 
 def progress_to_color(elapsed_ratio: float) -> str:

@@ -10,7 +10,7 @@ assert SPEC and SPEC.loader
 SPEC.loader.exec_module(app)
 
 
-class PomodoroVisualFeedbackTest(unittest.TestCase):
+class ProgressColorTest(unittest.TestCase):
     def test_clamp_limits_range(self) -> None:
         self.assertEqual(app.clamp(-1, 0, 1), 0)
         self.assertEqual(app.clamp(2, 0, 1), 1)
@@ -24,6 +24,13 @@ class PomodoroVisualFeedbackTest(unittest.TestCase):
     def test_progress_color_clamps_input(self) -> None:
         self.assertEqual(app.progress_to_color(-2.0), "#4287f5")
         self.assertEqual(app.progress_to_color(3.0), "#f54242")
+
+    def test_lerp_color_interpolation_and_bounds(self) -> None:
+        self.assertEqual(app.lerp_color((0, 0, 0), (255, 255, 255), 0.0), (0, 0, 0))
+        self.assertEqual(app.lerp_color((0, 0, 0), (255, 255, 255), 1.0), (255, 255, 255))
+        self.assertEqual(app.lerp_color((10, 20, 30), (110, 120, 130), 0.5), (60, 70, 80))
+        self.assertEqual(app.lerp_color((0, 0, 0), (255, 255, 255), -1.0), (0, 0, 0))
+        self.assertEqual(app.lerp_color((0, 0, 0), (255, 255, 255), 2.0), (255, 255, 255))
 
 
 if __name__ == "__main__":

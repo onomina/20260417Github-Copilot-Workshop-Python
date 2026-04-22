@@ -13,11 +13,11 @@ spec.loader.exec_module(app)
 
 
 class PomodoroAppTests(unittest.TestCase):
-    def test_options_are_customizable(self):
+    def test_timer_option_values(self):
         self.assertEqual(app.POMODORO_OPTIONS, [15, 25, 35, 45])
         self.assertEqual(app.BREAK_OPTIONS, [5, 10, 15])
 
-    def test_theme_modes_exist(self):
+    def test_theme_dictionary_contains_expected_keys(self):
         self.assertEqual(set(app.THEMES.keys()), {"light", "dark", "focus"})
 
     def test_html_contains_required_controls(self):

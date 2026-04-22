@@ -34,5 +34,55 @@ class ProgressColorTest(unittest.TestCase):
         self.assertEqual(app.lerp_color((0, 0, 0), (255, 255, 255), 2.0), (255, 255, 255))
 
 
+class StartBehaviorTest(unittest.TestCase):
+    def test_start_resets_remaining_seconds_after_finish(self) -> None:
+        class _DummyButton:
+            def __init__(self) -> None:
+                self.last_text = ""
+
+            def configure(self, **kwargs: str) -> None:
+                self.last_text = kwargs.get("text", "")
+
+        class _DummyRoot:
+            def __init__(self) -> None:
+                self.after_calls: list[tuple[int, object]] = []
+
+            def after(self, delay: int, callback: object) -> None:
+                self.after_calls.append((delay, callback))
+
+        class _DummyApp:
+            def __init__(self) -> None:
+                self.running = False
+                self.total_seconds = 1500
+                self.remaining_seconds = 0.0
+                self.ripples = [{"radius": 1.0}]
+                self.particles = [{"radius": 1.0}]
+                self.start_button = _DummyButton()
+                self.root = _DummyRoot()
+                self.started_at = 0.0
+                self.last_tick_remaining = 0.0
+                self.last_ripple_at = 0.0
+                self.draw_called = 0
+
+            def draw(self) -> None:
+                self.draw_called += 1
+
+            def tick(self) -> None:
+                return
+
+        dummy = _DummyApp()
+        app.PomodoroApp.start(dummy)
+
+        self.assertTrue(dummy.running)
+        self.assertEqual(dummy.remaining_seconds, float(dummy.total_seconds))
+        self.assertEqual(dummy.ripples, [])
+        self.assertEqual(dummy.particles, [])
+        self.assertEqual(dummy.draw_called, 1)
+        self.assertEqual(dummy.last_tick_remaining, float(dummy.total_seconds))
+        self.assertEqual(dummy.start_button.last_text, "進行中")
+        self.assertEqual(len(dummy.root.after_calls), 1)
+        self.assertEqual(dummy.root.after_calls[0][0], app.UPDATE_INTERVAL_MS)
+
+
 if __name__ == "__main__":
     unittest.main()

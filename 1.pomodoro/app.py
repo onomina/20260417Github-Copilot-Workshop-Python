@@ -163,6 +163,11 @@ class PomodoroApp:
     def start(self) -> None:
         if self.running:
             return
+        if self.remaining_seconds <= 0:
+            self.remaining_seconds = float(self.total_seconds)
+            self.ripples.clear()
+            self.particles.clear()
+            self.draw()
         self.running = True
         self.start_button.configure(text="進行中")
         self.started_at = time.perf_counter()

@@ -215,7 +215,6 @@ class PomodoroApp:
     def draw(self) -> None:
         self.canvas.delete("effect_dynamic")
 
-        center_x, center_y = self.center_x, self.center_y
         total_seconds = max(1.0, float(self.total_seconds))
         elapsed_ratio = 1 - (self.remaining_seconds / total_seconds)
         progress_extent = 360 * (self.remaining_seconds / total_seconds)
@@ -234,10 +233,10 @@ class PomodoroApp:
                     )
                     ripple_color = f"#{shade:02x}{shade:02x}ff"
                     self.canvas.create_oval(
-                        center_x - r,
-                        center_y - r,
-                        center_x + r,
-                        center_y + r,
+                        self.center_x - r,
+                        self.center_y - r,
+                        self.center_x + r,
+                        self.center_y + r,
                         outline=ripple_color,
                         width=2,
                         tags="effect_dynamic",
@@ -248,8 +247,8 @@ class PomodoroApp:
             for p in self.particles:
                 p["radius"] += p["speed"]
                 p["angle"] += p["drift"]
-                px = center_x + math.cos(p["angle"]) * p["radius"]
-                py = center_y + math.sin(p["angle"]) * p["radius"]
+                px = self.center_x + math.cos(p["angle"]) * p["radius"]
+                py = self.center_y + math.sin(p["angle"]) * p["radius"]
                 self.canvas.create_oval(
                     px - p["size"],
                     py - p["size"],

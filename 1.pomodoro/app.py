@@ -1,6 +1,7 @@
 import math
 import random
 import time
+from typing import cast
 try:
     import tkinter as tk
 except ModuleNotFoundError:
@@ -14,6 +15,17 @@ PARTICLE_MAX_RADIUS = 180.0
 RIPPLE_BASE_SHADE = 180
 RIPPLE_SHADE_OFFSET = 40
 RIPPLE_MIN_SHADE = 70
+RIPPLE_INITIAL_RADIUS = 38.0
+RIPPLE_SPEED = 1.2
+RIPPLE_MAX_RADIUS = 162.0
+PARTICLE_RADIUS_MIN = 104.0
+PARTICLE_RADIUS_MAX = 118.0
+PARTICLE_SPEED_MIN = 0.8
+PARTICLE_SPEED_MAX = 1.8
+PARTICLE_SIZE_MIN = 2.0
+PARTICLE_SIZE_MAX = 4.5
+PARTICLE_DRIFT_MIN = -0.03
+PARTICLE_DRIFT_MAX = 0.03
 
 RGBColor = tuple[int, int, int]
 BLUE: RGBColor = (66, 135, 245)
@@ -27,7 +39,7 @@ def clamp(value: float, minimum: float, maximum: float) -> float:
 
 def lerp_color(start: RGBColor, end: RGBColor, t: float) -> RGBColor:
     ratio = clamp(t, 0.0, 1.0)
-    return tuple(int(s + (e - s) * ratio) for s, e in zip(start, end))
+    return cast(RGBColor, tuple(int(s + (e - s) * ratio) for s, e in zip(start, end)))
 
 
 def progress_to_color(elapsed_ratio: float) -> str:
@@ -138,16 +150,18 @@ class PomodoroApp:
         self.remaining_seconds = max(0.0, self.last_tick_remaining - elapsed)
 
         if now - self.last_ripple_at >= 0.6:
-            self.ripples.append({"radius": 38.0, "speed": 1.2, "max_radius": 162.0})
+            self.ripples.append(
+                {"radius": RIPPLE_INITIAL_RADIUS, "speed": RIPPLE_SPEED, "max_radius": RIPPLE_MAX_RADIUS}
+            )
             self.last_ripple_at = now
 
         self.particles.append(
             {
                 "angle": random.uniform(0, 2 * math.pi),
-                "radius": random.uniform(104, 118),
-                "speed": random.uniform(0.8, 1.8),
-                "size": random.uniform(2.0, 4.5),
-                "drift": random.uniform(-0.03, 0.03),
+                "radius": random.uniform(PARTICLE_RADIUS_MIN, PARTICLE_RADIUS_MAX),
+                "speed": random.uniform(PARTICLE_SPEED_MIN, PARTICLE_SPEED_MAX),
+                "size": random.uniform(PARTICLE_SIZE_MIN, PARTICLE_SIZE_MAX),
+                "drift": random.uniform(PARTICLE_DRIFT_MIN, PARTICLE_DRIFT_MAX),
             }
         )
         if len(self.particles) > MAX_PARTICLES:

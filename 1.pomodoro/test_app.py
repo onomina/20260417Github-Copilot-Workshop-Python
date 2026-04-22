@@ -5,8 +5,9 @@ import unittest
 
 module_path = pathlib.Path(__file__).with_name("app.py")
 spec = importlib.util.spec_from_file_location("pomodoro_app", module_path)
+if spec is None or spec.loader is None:
+    raise RuntimeError("テスト対象モジュールをロードできません。")
 app = importlib.util.module_from_spec(spec)
-assert spec and spec.loader
 spec.loader.exec_module(app)
 
 

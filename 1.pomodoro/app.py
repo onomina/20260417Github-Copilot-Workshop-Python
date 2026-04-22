@@ -19,6 +19,7 @@ RIPPLE_INITIAL_RADIUS = 38.0
 RIPPLE_SPEED = 1.2
 RIPPLE_MAX_RADIUS = 162.0
 RIPPLE_RADIUS_STEP_MULTIPLIER = 2.0
+RIPPLE_SPAWN_INTERVAL_SECONDS = 0.6
 PARTICLE_RADIUS_MIN = 104.0
 PARTICLE_RADIUS_MAX = 118.0
 PARTICLE_SPEED_MIN = 0.8
@@ -151,7 +152,7 @@ class PomodoroApp:
         elapsed = now - self.started_at
         self.remaining_seconds = max(0.0, self.last_tick_remaining - elapsed)
 
-        if now - self.last_ripple_at >= 0.6:
+        if now - self.last_ripple_at >= RIPPLE_SPAWN_INTERVAL_SECONDS:
             self.ripples.append(
                 {"radius": RIPPLE_INITIAL_RADIUS, "speed": RIPPLE_SPEED, "max_radius": RIPPLE_MAX_RADIUS}
             )

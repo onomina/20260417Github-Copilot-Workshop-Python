@@ -35,7 +35,7 @@ class ProgressColorTest(unittest.TestCase):
 
 
 class StartBehaviorTest(unittest.TestCase):
-    def test_start_resets_remaining_seconds_after_finish(self) -> None:
+    def test_start_resets_when_remaining_seconds_is_zero(self) -> None:
         class _DummyButton:
             def __init__(self) -> None:
                 self.last_text = ""
@@ -68,7 +68,7 @@ class StartBehaviorTest(unittest.TestCase):
                 self.draw_called += 1
 
             def tick(self) -> None:
-                return
+                pass
 
         dummy = _DummyApp()
         app.PomodoroApp.start(dummy)

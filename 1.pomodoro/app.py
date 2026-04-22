@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections import defaultdict
 from datetime import date, datetime, timedelta
 from typing import Any
 
@@ -101,10 +100,10 @@ def summarize_period_stats(history: list[dict[str, Any]], days: int, today: date
         else 0.0
     )
 
-    by_day: dict[str, dict[str, int]] = defaultdict(lambda: {"completed": 0, "focus_minutes": 0})
-    for offset in range(days):
-        key = (start + timedelta(days=offset)).isoformat()
-        by_day[key]
+    by_day: dict[str, dict[str, int]] = {
+        (start + timedelta(days=offset)).isoformat(): {"completed": 0, "focus_minutes": 0}
+        for offset in range(days)
+    }
 
     for item in period_records:
         key = normalize_date(item["date"]).isoformat()

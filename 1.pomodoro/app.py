@@ -18,6 +18,7 @@ RIPPLE_MIN_SHADE = 70
 RIPPLE_INITIAL_RADIUS = 38.0
 RIPPLE_SPEED = 1.2
 RIPPLE_MAX_RADIUS = 162.0
+RIPPLE_RADIUS_STEP_MULTIPLIER = 2.0
 PARTICLE_RADIUS_MIN = 104.0
 PARTICLE_RADIUS_MAX = 118.0
 PARTICLE_SPEED_MIN = 0.8
@@ -197,7 +198,7 @@ class PomodoroApp:
 
         if self.running:
             for ripple in self.ripples:
-                ripple["radius"] += ripple["speed"] * 2
+                ripple["radius"] += ripple["speed"] * RIPPLE_RADIUS_STEP_MULTIPLIER
                 r = ripple["radius"]
                 if r < ripple["max_radius"]:
                     shade = int(

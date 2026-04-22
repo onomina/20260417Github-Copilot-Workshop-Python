@@ -3,11 +3,11 @@ import pathlib
 import unittest
 
 
-MODULE_PATH = pathlib.Path(__file__).with_name("app.py")
-SPEC = importlib.util.spec_from_file_location("pomodoro_app", MODULE_PATH)
-app = importlib.util.module_from_spec(SPEC)
-assert SPEC and SPEC.loader
-SPEC.loader.exec_module(app)
+module_path = pathlib.Path(__file__).with_name("app.py")
+spec = importlib.util.spec_from_file_location("pomodoro_app", module_path)
+app = importlib.util.module_from_spec(spec)
+assert spec and spec.loader
+spec.loader.exec_module(app)
 
 
 class ProgressColorTest(unittest.TestCase):

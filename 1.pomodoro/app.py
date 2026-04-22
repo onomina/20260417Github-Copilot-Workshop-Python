@@ -65,6 +65,7 @@ def progress_to_color(elapsed_ratio: float) -> str:
 
 
 def build_html() -> str:
+    """互換テスト向けに必要なコントロールIDを含む最小HTMLを返す。"""
     pomodoro_options = "".join(f'<option value="{minutes}">{minutes}分</option>' for minutes in POMODORO_OPTIONS)
     break_options = "".join(f'<option value="{minutes}">{minutes}分</option>' for minutes in BREAK_OPTIONS)
     theme_options = "".join(

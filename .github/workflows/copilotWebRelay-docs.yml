@@ -1,0 +1,44 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: Update copilotWebRelay Documentation
+
+on:
+  push:
+    paths:
+      - '2.copilotWebRelay/**'
+  pull_request:
+    paths:
+      - '2.copilotWebRelay/**'
+
+permissions:
+  contents: write
+
+jobs:
+  update-docs:
+    runs-on: ubuntu-latest
+    name: Update copilotWebRelay/docs
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          pip install -r 2.copilotWebRelay/requirements.txt || true
+
+      - name: Update documentation
+        run: |
+          python 2.copilotWebRelay/scripts/update_docs.py
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add 2.copilotWebRelay/docs
+          git diff --cached --quiet || git commit -m 'docs: update copilotWebRelay documentation [auto]'
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

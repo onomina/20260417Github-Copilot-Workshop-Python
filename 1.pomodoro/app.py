@@ -33,6 +33,13 @@ RGBColor = tuple[int, int, int]
 BLUE: RGBColor = (66, 135, 245)
 YELLOW: RGBColor = (245, 205, 66)
 RED: RGBColor = (245, 66, 66)
+POMODORO_OPTIONS = [15, 25, 35, 45]
+BREAK_OPTIONS = [5, 10, 15]
+THEMES = {
+    "light": {"label": "ライト", "bg": "#f6f7fb", "card": "#ffffff", "text": "#1e2330", "accent": "#4f46e5"},
+    "dark": {"label": "ダーク", "bg": "#121826", "card": "#1f2937", "text": "#f9fafb", "accent": "#60a5fa"},
+    "focus": {"label": "フォーカス", "bg": "#031b11", "card": "#0b2a1e", "text": "#dcfce7", "accent": "#34d399"},
+}
 
 
 def clamp(value: float, minimum: float, maximum: float) -> float:
@@ -55,6 +62,28 @@ def progress_to_color(elapsed_ratio: float) -> str:
     else:
         rgb = lerp_color(YELLOW, RED, (ratio - 0.5) * 2)
     return f"#{rgb[0]:02x}{rgb[1]:02x}{rgb[2]:02x}"
+
+
+def build_html() -> str:
+    pomodoro_options = "".join(f'<option value="{minutes}">{minutes}分</option>' for minutes in POMODORO_OPTIONS)
+    break_options = "".join(f'<option value="{minutes}">{minutes}分</option>' for minutes in BREAK_OPTIONS)
+    theme_options = "".join(
+        f'<option value="{theme_key}">{theme_value["label"]}</option>' for theme_key, theme_value in THEMES.items()
+    )
+    return f"""
+<!doctype html>
+<html lang="ja">
+<head><meta charset="utf-8"><title>Pomodoro Timer</title></head>
+<body>
+  <select id="pomodoro">{pomodoro_options}</select>
+  <select id="break">{break_options}</select>
+  <select id="theme">{theme_options}</select>
+  <input id="start-sound" type="checkbox" checked>
+  <input id="end-sound" type="checkbox" checked>
+  <input id="tick-sound" type="checkbox">
+</body>
+</html>
+""".strip()
 
 
 class PomodoroApp:

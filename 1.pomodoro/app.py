@@ -1,6 +1,8 @@
 import math
 import random
 import time
+from datetime import date, datetime, timedelta
+from typing import Any
 try:
     import tkinter as tk
 except ModuleNotFoundError:
@@ -40,6 +42,117 @@ THEMES = {
     "dark": {"label": "ダーク", "bg": "#121826", "card": "#1f2937", "text": "#f9fafb", "accent": "#60a5fa"},
     "focus": {"label": "フォーカス", "bg": "#031b11", "card": "#0b2a1e", "text": "#dcfce7", "accent": "#34d399"},
 }
+
+XP_PER_COMPLETION = 100
+XP_PER_LEVEL = 300
+
+
+def calculate_level(xp: int) -> int:
+    return (xp // XP_PER_LEVEL) + 1
+
+
+def normalize_date(value: Any) -> date:
+    if isinstance(value, date):
+        return value
+    if isinstance(value, datetime):
+        return value.date()
+    return datetime.strptime(str(value), "%Y-%m-%d").date()
+
+
+def calculate_streak_days(history: list[dict[str, Any]], today: date | None = None) -> int:
+    today = today or date.today()
+    completed_dates = {normalize_date(item["date"]) for item in history if item.get("completed")}
+
+    streak = 0
+    cursor = today
+    while cursor in completed_dates:
+        streak += 1
+        cursor -= timedelta(days=1)
+    return streak
+
+
+def calculate_achievements(history: list[dict[str, Any]], today: date | None = None) -> list[str]:
+    today = today or date.today()
+    completed_dates = sorted({normalize_date(item["date"]) for item in history if item.get("completed")})
+    completed_count = sum(1 for item in history if item.get("completed"))
+
+    achievements: list[str] = []
+    if completed_count >= 1:
+        achievements.append("初回完了")
+
+    longest = 0
+    current = 0
+    previous: date | None = None
+    for current_day in completed_dates:
+        if previous and current_day == previous + timedelta(days=1):
+            current += 1
+        else:
+            current = 1
+        longest = max(longest, current)
+        previous = current_day
+    if longest >= 3:
+        achievements.append("3日連続")
+
+    week_start = today - timedelta(days=today.weekday())
+    week_end = week_start + timedelta(days=6)
+    completed_this_week = sum(
+        1
+        for item in history
+        if item.get("completed") and week_start <= normalize_date(item["date"]) <= week_end
+    )
+    if completed_this_week >= 10:
+        achievements.append("今週10回完了")
+    return achievements
+
+
+def summarize_period_stats(history: list[dict[str, Any]], days: int, today: date | None = None) -> dict[str, Any]:
+    today = today or date.today()
+    start = today - timedelta(days=days - 1)
+    period_records = [item for item in history if start <= normalize_date(item["date"]) <= today]
+    completed_records = [item for item in period_records if item.get("completed")]
+
+    total = len(period_records)
+    completed = len(completed_records)
+    completion_rate = (completed / total * 100) if total else 0.0
+    average_focus = (
+        sum(int(item.get("focus_minutes", 0)) for item in completed_records) / completed
+        if completed
+        else 0.0
+    )
+
+    by_day: dict[str, dict[str, int]] = {
+        (start + timedelta(days=offset)).isoformat(): {"completed": 0, "focus_minutes": 0}
+        for offset in range(days)
+    }
+
+    for item in period_records:
+        key = normalize_date(item["date"]).isoformat()
+        by_day[key]["focus_minutes"] += int(item.get("focus_minutes", 0))
+        if item.get("completed"):
+            by_day[key]["completed"] += 1
+
+    return {
+        "completion_rate": completion_rate,
+        "average_focus_minutes": average_focus,
+        "completed_count": completed,
+        "total_count": total,
+        "daily_labels": list(by_day.keys()),
+        "daily_completed": [value["completed"] for value in by_day.values()],
+        "daily_focus_minutes": [value["focus_minutes"] for value in by_day.values()],
+    }
+
+
+def compute_progress(history: list[dict[str, Any]], today: date | None = None) -> dict[str, Any]:
+    completed_records = [item for item in history if item.get("completed")]
+    xp = len(completed_records) * XP_PER_COMPLETION
+    return {
+        "xp": xp,
+        "level": calculate_level(xp),
+        "achievements": calculate_achievements(history, today=today),
+        "streak_days": calculate_streak_days(history, today=today),
+        "weekly_stats": summarize_period_stats(history, days=7, today=today),
+        "monthly_stats": summarize_period_stats(history, days=30, today=today),
+    }
 
 
 def clamp(value: float, minimum: float, maximum: float) -> float:
